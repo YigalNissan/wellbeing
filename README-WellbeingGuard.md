@@ -1,63 +1,61 @@
-# שומר זמן מסך (Wellbeing Guard)
+# Screen Time Guard (Wellbeing Guard)
 
-אפליקציית אנדרואיד שבודקת כל חצי שעה את זמן המסך היומי — אותם נתונים שעליהם מבוססת
-אפליקציית **Digital Wellbeing** — ואם עברת את המגבלה שהגדרת, קופצת התראה במכשיר
-**וגם** נשלחת הודעה למכשירים נוספים שהגדרת.
+An Android app that checks your daily screen time every half hour — the same data that the Digital Wellbeing app is based on — and if you exceed the limit you set, an alert pops up on your device
+**and** a message is also sent to other devices you set.
 
-## מה יש באפליקציה
+## What's in the app
 
-| יכולת | פירוט |
+| Capability | Details |
 |---|---|
-| מדידת זמן מסך | דרך `UsageStatsManager` (המקור של Digital Wellbeing), מחצות ועד עכשיו |
-| בדיקה מחזורית | `WorkManager` — ברירת מחדל 30 דקות (המינימום שאנדרואיד מאפשר הוא 15) |
-| מגבלה כפרמטר | שדה "מגבלה יומית בשעות" באפליקציה, תומך גם בשברים (2.5) |
-| התראה מקומית | Notification בעדיפות גבוהה |
-| התראה לטלפונים נוספים | SMS למספרים שהוגדרו, ו/או הודעת בוט טלגרם |
-| מניעת ספאם | "מרווח בין התראות" — לא יותר מהתראה אחת בפרק זמן שהוגדר |
-| הפעלה אוטומטית | ממשיך לעבוד אחרי ריסטארט למכשיר |
+| Screen time measurement | via `UsageStatsManager` (the source of Digital Wellbeing), from midnight until now |
+| Periodic check | `WorkManager` — default 30 minutes (the minimum Android allows is 15) |
+| Limit as a parameter | "Daily limit in hours" field in the app, also supports fractions (2.5) |
+| Local alert | High priority notification |
+| Alert to additional phones | SMS to defined numbers, and/or Telegram bot message |
+| Spam prevention | "Notification interval" — no more than one notification in a set period of time |
+| Auto-start | Continues to work after device restart |
 
-הכול נשמר מקומית במכשיר. אין שרת ואין איסוף מידע.
+Everything is saved locally on the device. There is no server and no data collection.
 
-## איך בונים את ה-APK
+## How to build the APK
 
-### אפשרות א' — בלי להתקין כלום (GitHub Actions)
-1. פותחים ריפו חדש ב-GitHub ומעלים אליו את התיקייה הזו.
-2. לשונית **Actions** → ה-workflow "Build APK" רץ אוטומטית.
-3. בסיום, מורידים את ה-artifact בשם `wellbeing-guard-apk` — בפנים `app-debug.apk`.
-4. מעבירים לטלפון, פותחים, ומאשרים "התקנה ממקור לא ידוע".
+### Option A — without installing anything (GitHub Actions)
+1. Open a new repo on GitHub and upload this folder to it.
+2. **Actions** tab → The "Build APK" workflow runs automatically.
+3. When finished, download the artifact named `wellbeing-guard-apk` — inside `app-debug.apk`.
+4. Transfer to the phone, open, and confirm "Install from unknown sources"
+### Option B — Android Studio
+`File → Open` on the folder, then `Build → Build APK(s)` or run directly on a connected device.
 
-### אפשרות ב' — Android Studio
-`File → Open` על התיקייה, ואז `Build → Build APK(s)` או הרצה ישירה למכשיר מחובר.
-
-### אפשרות ג' — שורת פקודה
+### Option C — Command line
 ```bash
 ./gradlew assembleDebug
-# הפלט: app/build/outputs/apk/debug/app-debug.apk
+# Output: app/build/outputs/apk/debug/app-debug.apk
 ```
 
-## הפעלה ראשונה בטלפון
+## First launch on the phone
 
-1. **אישור גישה לנתוני שימוש** — הכפתור פותח את מסך ההגדרות של אנדרואיד;
-   מאתרים את "שומר זמן מסך" ומדליקים. בלי זה אי אפשר למדוד זמן מסך.
-2. **אישור התראות ו-SMS**.
-3. **ביטול אופטימיזציית סוללה** — מומלץ מאוד, אחרת אנדרואיד עלול לדחות את הבדיקות.
-4. ממלאים מגבלה, מספרי טלפון, ומדליקים את המתג **ניטור פעיל**.
-5. כדאי ללחוץ **שליחת התראת בדיקה** כדי לוודא שההודעות מגיעות ליעד.
+1. **Allow access to usage data** — The button opens the Android settings screen;
+Locate "Screen saver" and turn it on. Without this, it is impossible to measure screen time.
+2. **Allow notifications and SMS**.
+3. **Disable battery optimization** — Highly recommended, otherwise Android may reject the tests.
+4. Fill in the limit, phone numbers, and turn on the **Active monitoring** switch.
+5. It is worth clicking **Send test notification** to make sure that the messages reach the destination.
 
-## טלגרם במקום SMS (מומלץ)
+## Telegram instead of SMS (recommended)
 
-שליחת SMS דורשת הרשאה שגוגל מגבילה מאוד בחנות, והודעות עולות כסף. חלופה חינמית:
+Sending SMS requires a permission that Google is very restrictive about in the store, and messages cost money. Free alternative:
 
-1. בטלגרם, פותחים צ'אט עם `@BotFather` → `/newbot` → מקבלים **טוקן**.
-2. מדביקים את הטוקן בשדה `Telegram Bot Token`.
-3. כל אחד מהנמענים שולח הודעה אחת לבוט (חובה, אחרת הבוט לא יכול לפנות אליו),
-   ומוצא את מזהה הצ'אט שלו דרך `@userinfobot`.
-4. מדביקים את המזהים בשדה מזהי הצ'אט, מופרדים בפסיק.
+1. In Telegram, open a chat with `@BotFather` → `/newbot` → receive a **token**.
+2. Paste the token in the `Telegram Bot Token` field.
+3. Each recipient sends one message to the bot (required, otherwise the bot cannot contact them),
+and finds their chat ID via `@userinfobot`.
+4. Paste the IDs in the Chat IDs field, separated by a comma.
 
-## מגבלות שכדאי להכיר
+## Limitations worth knowing
 
-- אנדרואיד לא מאפשר לקרוא את **ההגדרות** של Digital Wellbeing עצמה (הטיימרים שהוגדרו שם),
-  אבל כן מאפשר לקרוא את אותם **נתוני שימוש** שהיא מציגה — וזה מה שהאפליקציה עושה.
-- `WorkManager` לא מתחייב לדיוק של שנייה; בדיקה עשויה להתעכב במצב Doze.
-  ביטול אופטימיזציית הסוללה פותר את זה כמעט תמיד.
-- זו גרסת debug חתומה במפתח פיתוח — מצוינת לשימוש אישי, לא להעלאה לחנות.
+- Android does not allow you to read the **settings** of Digital Wellbeing itself (the timers set there),
+but it does allow you to read the **usage data** that it displays — and that's what the app does.
+- `WorkManager` does not guarantee accuracy to the second; Testing may be delayed in Doze mode.
+Disabling battery optimization almost always fixes this.
+- This is a debug version signed by a developer — great for personal use, not for uploading to the store
